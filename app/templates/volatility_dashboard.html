@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volatility & Risk Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="container">
+    <h1>Volatility & Risk Dashboard</h1>
+    <p>Average Daily Volatility: {{ volatility }}%</p>
+    <p>Number of Recent Spikes: {{ spikes }}</p>
+
+    <canvas id="volChart"></canvas>
+    <a href="{{ url_for('finance_routes.home') }}"><button>Back to Dashboard</button></a>
+</div>
+
+<script>
+const ctx = document.getElementById('volChart').getContext('2d');
+const datesData = JSON.parse('{{ dates | tojson | safe }}');
+const dailyChanges = JSON.parse('{{ daily_changes | tojson | safe }}');
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: datesData,
+        datasets: [{
+            label: 'Daily % Change',
+            data: dailyChanges,
+            borderColor: 'red',
+            borderWidth: 2,
+            fill: false,
+            tension: 0.2
+        }]
+    }
+});
+</script>
+</body>
+</html>

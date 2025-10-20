@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predict Next Close Price</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100 flex justify-center py-10">
+
+<div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
+    <h1 class="text-2xl font-bold text-center text-blue-600 mb-6">Predict Next Close Price</h1>
+
+    <form id="predictForm" class="space-y-4">
+        <!-- Stock Ticker -->
+        <div>
+          <label class="block font-semibold mb-1">Stock Ticker:</label>
+          <select name="ticker" class="w-full p-2 border rounded" required>
+            <option value="NIFTY50">Nifty 50</option>
+          </select>
+        </div>
+
+        <!-- Time Horizon -->
+        <div>
+            <label class="block font-semibold mb-1">Time Horizon:</label>
+            <select name="horizon" class="w-full p-2 border rounded">
+                <option value="1">Next Day</option>
+                <option value="5">Next 5 Days</option>
+                <option value="20">Next Month</option>
+            </select>
+        </div>
+
+        <!-- Risk Appetite -->
+        <div>
+            <label class="block font-semibold mb-1">Risk Appetite:</label>
+            <select name="risk" class="w-full p-2 border rounded">
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+            </select>
+        </div>
+
+        <!-- Investment Goal -->
+        <div>
+            <label class="block font-semibold mb-1">Investment Goal:</label>
+            <select name="goal" class="w-full p-2 border rounded">
+                <option value="Short-term">Short-term Profit</option>
+                <option value="Long-term">Long-term Growth</option>
+            </select>
+        </div>
+
+        <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Predict & Generate Report</button>
+    </form>
+
+    <!-- Report Output -->
+    <div id="predictionReport" class="mt-6 bg-gray-50 p-4 rounded hidden">
+        <h2 class="font-bold text-lg mb-2">Prediction Report</h2>
+        <p id="reportText" class="text-gray-700"></p>
+        <!-- Chart Canvas -->
+        <canvas id="priceChart" class="mt-4"></canvas>
+    </div>
+</div>
+
+<script>
+let chartInstance = null; // To store Chart.js instance
+
+document.getElementById('predictForm').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+
+    const res = await fetch('/predict-next', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(data)
+    });
+
+    const result = await res.json();
+    const reportDiv = document.getElementById('predictionReport');
+    const reportText = document.getElementById('reportText');
+
+    if(result.error){
+        reportDiv.classList.remove('hidden');
+        reportText.innerHTML = `<span class="text-red-600 font-semibold">Error:</span> ${result.error}`;
+    } else {
+        reportDiv.classList.remove('hidden');
+        reportText.innerHTML = `
+            Predicted Next Close Price: <strong>₹${result.prediction}</strong><br>
+            Personalized Suggestion: <strong>${result.suggestion}</strong><br>
+            Last 30 Days Trend: <strong>${result.trend}</strong><br>
+            Volatility: <strong>${result.volatility}%</strong>
+        `;
+
+        // --- Chart ---
+        const ctx = document.getElementById('priceChart').getContext('2d');
+
+        // Use last 30 days + predicted price
+        const labels = [...Array(result.last_30_days.length).keys()].map(i => `Day ${i+1}`);
+        labels.push('Prediction');
+
+        const prices = [...result.last_30_days, result.prediction];
+
+        // Destroy previous chart if exists
+        if(chartInstance) chartInstance.destroy();
+
+        chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Close Price',
+                    data: prices,
+                    borderColor: '#28a745',
+                    backgroundColor: 'rgba(40, 167, 69,0.2)',
+                    tension: 0.2,
+                    fill: true,
+                    pointBackgroundColor: [...Array(result.last_30_days.length).fill('#3b82f6'), '#f87171']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: false }
+                }
+            }
+        });
+    }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historical Trend Summary</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .instructions {
+            background: #f0f4f8;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .instructions h2 {
+            margin-top: 0;
+            color: #007bff;
+        }
+        .instructions ul {
+            padding-left: 20px;
+        }
+        .chart-section {
+            margin-bottom: 40px;
+        }
+        .chart-box {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        .kpis {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            padding: 10px 0;
+            background: #e9ecef;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Historical Trend Summary</h1>
+
+    <!-- Instructions Block -->
+    <div class="instructions">
+        <h2>How to Use This Dashboard</h2>
+        <ul>
+            <li><strong>Price Trends & Moving Averages:</strong> Observe overall price direction. MA20/MA50 show short-term trends, MA200 shows long-term trends. Bollinger Bands highlight volatility wider bands indicate high volatility.</li>
+            <br><li><strong>Daily Returns:</strong> Shows % change in price each day. Helps spot sudden spikes or dips, giving insight into short-term risk.</li>
+            <br><li><strong>Trading Volume:</strong> Shows how many shares are traded each day. Higher volume often confirms price moves; low volume may indicate weak trends.</li>
+            <br><li><strong>Technical Indicators (RSI & MACD):</strong> RSI indicates overbought/oversold conditions. MACD shows trend strength and potential reversal points. (above 70 = overbought, below 30 = oversold)</li>
+            <br><li><strong>Drawdown:</strong> Highlights the largest decline from peak price. Helps understand historical risk and worst-case scenarios.</li>
+            <br><li><strong>Support & Resistance Levels:</strong> Strong support shows price floors; resistance indicates ceilings. Useful for setting stop-loss or target prices.</li>
+            <br><li><strong>KPIs:</strong> Quick summary of overall trend, highest volatility, and support level for fast decision-making.</li>
+        </ul>
+    </div>
+
+    <!-- KPI Widgets -->
+    <div class="kpis">
+        <p><strong>Overall Trend:</strong> {{ trend_pct }}%</p>
+        <p><strong>Highest Volatility:</strong> {{ highest_vol }}%</p>
+        <p><strong>Strong Support Level:</strong> ₹{{ support_level }}</p>
+    </div>
+
+    <!-- Price Chart with MAs and Bollinger Bands -->
+    <div class="chart-section">
+        <div class="chart-box">
+            <strong>Price Chart:</strong> Visual representation of stock price with moving averages and Bollinger Bands.
+        </div>
+        <canvas id="priceChart"></canvas>
+    </div>
+
+    <!-- Daily Return Chart -->
+    <div class="chart-section">
+        <div class="chart-box">
+            <strong>Daily Return Chart:</strong> See daily percentage change for short-term trend and volatility insights.
+        </div>
+        <canvas id="dailyReturnChart"></canvas>
+    </div>
+
+    <!-- Technical Indicators Chart -->
+    <div class="chart-section">
+        <div class="chart-box">
+            <strong>Technical Indicators:</strong> RSI and MACD for trend analysis and potential buy/sell signals.
+        </div>
+        <canvas id="technicalChart"></canvas>
+    </div>
+
+    <a href="{{ url_for('finance_routes.home') }}"><button>Back to Dashboard</button></a>
+</div>
+
+<script>
+const dates = {{ dates | tojson }};
+const prices = {{ prices | tojson }};
+const ma20 = {{ ma20 | tojson }};
+const ma50 = {{ ma50 | tojson }};
+const ma200 = {{ ma200 | tojson }};
+const bb_upper = {{ bb_upper | tojson }};
+const bb_lower = {{ bb_lower | tojson }};
+const daily_return = {{ daily_return | tojson }};
+const monthly_return = {{ monthly_return | tojson }};
+const drawdown = {{ drawdown | tojson }};
+const volume = {{ volume | tojson }};
+const rsi = {{ rsi | tojson }};
+const macd = {{ macd | tojson }};
+
+// --- Price Chart ---
+new Chart(document.getElementById('priceChart'), {
+    type: 'line',
+    data: {
+        labels: dates,
+        datasets: [
+            { label: 'Close Price', data: prices, borderColor: '#007bff', fill: false },
+            { label: 'MA 20', data: ma20, borderColor: '#28a745', fill: false },
+            { label: 'MA 50', data: ma50, borderColor: '#ffc107', fill: false },
+            { label: 'MA 200', data: ma200, borderColor: '#6f42c1', fill: false },
+            { label: 'BB Upper', data: bb_upper, borderColor: 'rgba(255,0,0,0.5)', borderDash: [5,5], fill: false },
+            { label: 'BB Lower', data: bb_lower, borderColor: 'rgba(0,255,0,0.5)', borderDash: [5,5], fill: false }
+        ]
+    }
+});
+
+// --- Daily Return Chart ---
+new Chart(document.getElementById('dailyReturnChart'), {
+    type: 'bar',
+    data: { labels: dates, datasets: [{ label: 'Daily % Return', data: daily_return, backgroundColor: '#17a2b8' }] }
+});
+
+
+// --- Technical Indicators Chart (RSI & MACD) ---
+new Chart(document.getElementById('technicalChart'), {
+    type: 'line',
+    data: {
+        labels: dates,
+        datasets: [
+            { label: 'RSI', data: rsi, borderColor: '#fd7e14', fill: false },
+            { label: 'MACD', data: macd, borderColor: '#20c997', fill: false }
+        ]
+    }
+});
+</script>
+</body>
+</html>
+

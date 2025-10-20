@@ -1,0 +1,60 @@
+<!-- templates/view_profile.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center py-10">
+
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-5xl p-8">
+        <h2 class="text-4xl font-bold text-gray-800 mb-8 text-center">👤 Your Profile</h2>
+
+        {% if profile %}
+        <div class="bg-gray-50 rounded-2xl p-6 space-y-6">
+            <!-- Personal Info -->
+            <div class="bg-white rounded-xl p-4 shadow">
+                <h3 class="text-2xl font-semibold mb-3 text-gray-700 border-b border-gray-200 pb-2">Personal Info</h3>
+                <p><span class="font-medium text-gray-600">Full Name:</span> {{ profile['full_name'] }}</p>
+                <p><span class="font-medium text-gray-600">Age:</span> {{ profile['age'] }}</p>
+                <p><span class="font-medium text-gray-600">Occupation:</span> {{ profile['occupation'] }}</p>
+            </div>
+
+            <!-- Financial Info -->
+            <div class="bg-white rounded-xl p-4 shadow">
+                <h3 class="text-2xl font-semibold mb-3 text-gray-700 border-b border-gray-200 pb-2">Financial Info</h3>
+                <p><span class="font-medium text-gray-600">Salary:</span> ₹{{ profile['salary'] }}</p>
+                <p><span class="font-medium text-gray-600">Expenses:</span> ₹{{ profile['expenses'] }}</p>
+                <p><span class="font-medium text-gray-600">Investment Amount:</span> ₹{{ profile['investment_amt'] }}</p>
+            </div>
+
+            <!-- Goals & Risk -->
+            <div class="bg-white rounded-xl p-4 shadow">
+                <h3 class="text-2xl font-semibold mb-3 text-gray-700 border-b border-gray-200 pb-2">Goals & Risk</h3>
+                <p><span class="font-medium text-gray-600">Savings Goal:</span> {{ profile['savings_goal'] }}</p>
+                <p><span class="font-medium text-gray-600">Risk Profile:</span> {{ profile['risk_profile'] }}</p>
+            </div>
+
+            <!-- Investment Experience -->
+            <div class="bg-white rounded-xl p-4 shadow">
+                <h3 class="text-2xl font-semibold mb-3 text-gray-700 border-b border-gray-200 pb-2">Investment Experience</h3>
+                <p><span class="font-medium text-gray-600">Experience Level:</span> {{ profile['investment_experience'] }}</p>
+                <p><span class="font-medium text-gray-600">Investment Horizon:</span> {{ profile['investment_horizon'] }}</p>
+                <p><span class="font-medium text-gray-600">Preferred Instruments:</span> {{ profile['preferred_instruments'] }}</p>
+            </div>
+        </div>
+        {% else %}
+        <p class="text-center text-gray-500 mt-4 text-lg">No profile data found. Please complete your profile.</p>
+        {% endif %}
+
+        <div class="mt-8 text-center">
+            <a href="{{ url_for('finance_routes.home') }}" class="bg-blue-500 text-white px-6 py-3 rounded-xl hover:bg-blue-600 font-medium shadow-md transition">
+                ← Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>

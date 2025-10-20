@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Finance Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Move Font Awesome here -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <!-- Sidebar -->
+    <div class="flex min-h-screen">
+        <div class="bg-gray-900 text-white w-64 flex-shrink-0 flex flex-col justify-between">
+            <div>
+                <div class="p-8 text-center border-b border-gray-700">
+                    <h1 class="text-2xl font-bold">Dashboard</h1>
+                </div>
+
+                <!-- Navigation Links -->
+                <a href="{{ url_for('auth_routes.profile') }}" class="block py-4 px-4 hover:bg-gray-700 transition rounded-lg">
+                    <i class="fas fa-user mr-2"></i> Profile
+                </a>
+                <a href="{{ url_for('finance_routes.predict_dashboard') }}" class="block py-4 px-4 hover:bg-gray-700 transition rounded-lg">
+                    <i class="fas fa-chart-line mr-2"></i> Predict Next Close
+                </a>
+                <a href="{{ url_for('finance_routes.volatility_dashboard') }}" class="block py-4 px-4 hover:bg-gray-700 transition rounded-lg">
+                    <i class="fas fa-bolt mr-2"></i> Volatility & Risk
+                </a>
+                <a href="{{ url_for('finance_routes.trend_dashboard') }}" class="block py-4 px-4 hover:bg-gray-700 transition rounded-lg">
+                    <i class="fas fa-chart-bar mr-2"></i> Historical Trend
+                </a>
+                <a href="{{ url_for('finance_routes.help_desk') }}" class="block py-4 px-4 hover:bg-gray-700 transition rounded-lg">
+                    <i class="fas fa-life-ring mr-2"></i> Help Desk
+                </a>
+            </div>
+
+            <!-- Login/Signup/Logout -->
+            <div class="p-6 border-t border-gray-700">
+                {% if session.get('username') %}
+                    <div class="text-center">
+                        <span class="block mb-2 font-medium">👤 {{ session['username'] }}</span>
+                        <a href="{{ url_for('auth_routes.logout') }}" class="w-full bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg inline-block text-white text-center">
+                            Logout
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="flex flex-col gap-2">
+                        <a href="{{ url_for('auth_routes.login') }}" class="w-full bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg inline-block text-white text-center">
+                            Login
+                        </a>
+                        <a href="{{ url_for('auth_routes.signup') }}" class="w-full bg-green-500 hover:bg-green-600 px-4 py-2 rounded-lg inline-block text-white text-center">
+                            Sign Up
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex-1 p-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">ML + DB Integrated Finance Platform</h1>
+            <h5 class="text-gray-600 mb-6">Stock Analysis of Previous Years</h5>
+
+            <!-- Stock Chart -->
+            <div class="bg-white p-6 rounded-2xl shadow-lg mb-6">
+                <canvas id="stockChart"></canvas>
+            </div>
+            <div class="mt-4 text-right">
+            <p class="text-sm text-black font-medium">Engineered by Harish Akshay</p>
+            <p class="text-sm text-gray-600">✉️ harishakshay2006@gmail.com</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        let dates = [];
+        let prices = [];
+        try {
+            dates = JSON.parse('{{ dates | tojson | safe }}');
+            prices = JSON.parse('{{ prices | tojson | safe }}');
+        } catch (e) {
+            console.error("Error parsing chart data:", e);
+        }
+
+        const ctx = document.getElementById('stockChart').getContext('2d');
+        const stockChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [{
+                    label: 'Stock Prices',
+                    data: prices,
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: true },
+                    tooltip: { mode: 'index', intersect: false }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    intersect: false
+                },
+                scales: {
+                    x: { display: true, title: { display: true, text: 'Date' } },
+                    y: { display: true, title: { display: true, text: 'Price (₹)' } }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
