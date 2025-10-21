@@ -79,7 +79,7 @@ def signup():
     return render_template('signup.html')
 
 
-@auth_routes.route('/profile', methods=['GET', 'POST'])
+@auth_routes.route('/view_profile', methods=['GET', 'POST'])
 def profile():
     # Ensure user is logged in right after signup
     if 'user_id' not in session:
@@ -118,7 +118,7 @@ def profile():
         flash("Profile saved successfully!", "success")
         return redirect(url_for('finance_routes.home'))
 
-    return render_template('profile.html')
+    return render_template('view_profile.html')
 
 
 @auth_routes.route('/login', methods=['GET', 'POST'])
